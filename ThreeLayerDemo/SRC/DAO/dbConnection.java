@@ -1,29 +1,57 @@
-package BUS;
-import DAO.*;
-import VO.*;
+package DAO;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
-public class userBUS {
-    private userDAO _userDAO;
-    public userBUS(){
-        _userDAO=new userDAO();
+public class dbConnection {
+    private Connection conn;
+    public dbConnection()
+    {
+        conn=getLink.getLink();
     }
-    public userVO getUserEmailByName(String name){
-        userVO _userVo = new userVO();
+    // SELECT Query
+    public ResultSet executeSeleceQuery(String SQL,String []par)
+    {
+        ResultSet resultSet=null;
         try {
-            ResultSet resultSet = _userDAO.searchByName(name);
-            while(resultSet.next())
+            PreparedStatement preparedStatement = conn.prepareStatement(SQL);
+            int len=par.length;
+            //设置参数
+            for(int i=0;i<len;i++)
             {
-                _userVo.set_idUser(resultSet.getInt(1));
-                _userVo.set_firstname(resultSet.getString(2));
-                _userVo.set_lastname(resultSet.getString(3));
-                _userVo.set_email(resultSet.getString(4));
+                preparedStatement.setString(i+1,par[i]);
             }
+            resultSet=preparedStatement.executeQuery();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return resultSet;
+    }
+    //Update
+    public boolean executeUpdateQuery(String sql,String []par)
+    {
+        try {
+
+            PreparedStatement preparedStatement=conn.prepareStatement(sql);
+            int len=par.length;
+            //设置参数
+            for(int i=0;i<len;i++)
+            {
+                preparedStatement.setString(i+1,par[i]);
+            }
+            int flag=preparedStatement.executeUpdate();
+            if(flag==0) {
+                return false;
+            }
+            return true;
         }catch (Exception e)
         {
             e.printStackTrace();
         }
-        return _userVo;
+        return false;
     }
+
 }
